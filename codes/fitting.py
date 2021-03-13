@@ -14,11 +14,11 @@ f = fits.open('map2048_MILCA_Coma_20deg_G.fits')
 
 data = f[1].data
 
-x,y = np.unravel_index(data.argmax(), data.shape) 
+x,y = np.unravel_index(data.argmax(), data.shape)
 
 print(x,y)  # max y is assumed to be centre of coma
 
-r_i = 1   #initial r
+r_i = 1   
 r_f = 65
 size = r_f - r_i 
 
