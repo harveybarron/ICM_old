@@ -31,13 +31,38 @@ print("\nStd:",np.std(data))
 
 from matplotlib.colors import TwoSlopeNorm
 
+x_ticks = ['-10', '-5', '0', '5', '10' ]
+y_ticks = ['10', '5', '0', '-5', '-10' ]
+t11 = [0,175,350,525,699]
+
+plt.xticks(ticks=t11, labels=x_ticks, size='small')
+plt.yticks(ticks=t11, labels=y_ticks, size='small')
+
 norm = TwoSlopeNorm(vmin=data.min(), vcenter=0, vmax=data.max())
 pc = plt.pcolormesh(data, norm=norm, cmap="seismic")     
 plt.imshow(data, cmap = 'seismic')
 plt.colorbar(pc)
+plt.xlabel("degrees")
+plt.ylabel("degrees")
 plt.title("y map in MILCA")
-plt.savefig("figure 1.svg", dpi = 500)
+plt.savefig("figure 1.svg", dpi = 1200)
 plt.show()
 
 
 histogram = plt.hist(data.flat, bins=500)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

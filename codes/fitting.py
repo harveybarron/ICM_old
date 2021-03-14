@@ -68,11 +68,19 @@ for r in range (r_i,r_f,1):
 print("\n")    
 print(a_fit, b_fit, c_fit)
 
+x_ticks = ['100', '1000']
+y_ticks = ['10','1','0.1']
+
+t11 = [np.log10(2),np.log10(22)]
+t12 = [-5,-6,-7]
+
+plt.xticks(ticks=t11, labels=x_ticks, size='small')
+plt.yticks(ticks=t12, labels=y_ticks, size='small')
     
 plt.plot(rs_log, ys_log, label = 'Milca y-profile')
 plt.plot( rs_log, beta_fit_log, label = 'Beta-model fit')
-plt.xlabel("Log10 of distance from centre of cluster in terms of matrix size" ,fontsize=11)
-plt.ylabel("Log10 of average y profile" ,fontsize=11)
+plt.xlabel("Distance from centre of cluster (kpc)" ,fontsize=11)
+plt.ylabel("Average y profile (10^-6)" ,fontsize=11)
 plt.title("Avg y profile in MILCA map", fontsize=13)
 plt.legend()
 plt.savefig('Figure 2 with beta fit.svg', dpi = 1200)
