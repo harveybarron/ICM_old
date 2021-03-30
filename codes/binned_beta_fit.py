@@ -54,7 +54,7 @@ plt.xticks(ticks=t11, labels=x_ticks, size='small')
 plt.yticks(ticks=t12, labels=y_ticks, size='small')
 
 plt.plot(rs_log, ys_log,'o' ,label = 'Milca y-profile')
-plt.plot( rs_log, beta_fit_log, label = 'Beta-model fit')
+plt.plot( rs_log, beta_fit_log, label = 'Beta-model fit with beta = %1.3f'%c_fit)
 plt.xlabel("Distance from centre of cluster (kpc)" ,fontsize=11)
 plt.ylabel("Average y profile (10^-6)" ,fontsize=11)
 plt.title("Avg y profile in MILCA map", fontsize=13)
