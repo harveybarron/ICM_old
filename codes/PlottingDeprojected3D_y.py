@@ -63,7 +63,7 @@ plt.plot(np.log10(rs[:]),np.log10(ys_3d_deconv[:]),'o' ,label = 'Milca 3D y-prof
 plt.xlabel("Distance from centre of cluster (kpc)" ,fontsize=11)
 plt.ylabel("Average 3D y profile ($10^{-6}$)" ,fontsize=11)
 plt.title("3D y profile after deconvolution and deprojection", fontsize=13)
-plt.legend()
+plt.legend(loc=3)
 plt.savefig("3D y with PSF.png", dpi = 1200)
 plt.show()
 
