@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jun 10 12:17:16 2021
-@author: Chandraniva
-
-"""
-
 import numpy as np
 import pymaster as nmt
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
 
 pixsize = 1.7177432059
 conv =  27.052 #kpc
@@ -16,11 +10,9 @@ y_fluc = np.loadtxt('y_fluc.txt')
 
 Lx = 4. * np.pi/180
 Ly = 4. * np.pi/180
-#  - Nx and Ny: the number of pixels in the x and y dimensions
 Nx, Ny = len(y_fluc),  len(y_fluc)
 
-# Masks:
-# Let's now create a mask
+
 mask = np.zeros((Nx,Ny))
 cen_x, cen_y = Nx/2., Ny/2.
 cr = 60
@@ -31,9 +23,6 @@ idx = np.where(dist<=cr)
 theta_ap = 15 
 mask[idx]=1-np.exp(-9*(dist[idx]-cr)**2/(2*theta_ap**2))
 
-
-# You can also apodize it in the same way you do for full-sky masks:
-#mask = nmt.mask_apodization_flat(mask, Lx, Ly, aposize=0.05, apotype="Smooth")
 
 plt.figure()
 x_ticks = ['-2', '-1','0','1','2']
@@ -46,64 +35,75 @@ plt.colorbar()
 plt.savefig("Apodized mask.png",dpi = 400)
 plt.show()
 
-# Fields:
-# Once you have maps it's time to create pymaster fields.
-# Note that, as in the full-sky case, you can also pass
-# contaminant templates and flags for E and B purification
-# (see the documentation for more details)
-f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc])
-#f2 = nmt.NmtFieldFlat(Lx, Ly, mask, [mpq, mpu], purify_b=True)
+bin_number = 20
 
-# Bins:
-# For flat-sky fields, bandpowers are simply defined as intervals in ell, and
-# pymaster doesn't currently support any weighting scheme within each interval.
-bin_num = 5
-l0_bins = np.arange(Nx/bin_num) * bin_num * np.pi/Lx
-lf_bins = (np.arange(Nx/bin_num)+1) * bin_num * np.pi/Lx
+l_min = 180*60*conv/2000 
+l_max = 180*60*conv/500 
+
+bin_size = (l_max-l_min)/bin_number
+
+l0_bins=[]
+lf_bins=[]
+
+for i in range (bin_number):
+    l0_bins.append(l_min+bin_size*i)
+    lf_bins.append(l_min+bin_size*(i+1))
+
+
+print(l0_bins)
+print(lf_bins)
 
 b = nmt.NmtBinFlat(l0_bins, lf_bins)
-# The effective sampling rate for these bandpowers can be obtained calling:
 ells_uncoupled = b.get_effective_ells()
+print(ells_uncoupled)
+lambdas_inv = 1/(conv*60*180/ells_uncoupled)
+k = 2*np.pi*lambdas_inv
 
-# Workspaces:
-# As in the full-sky case, the computation of the coupling matrix and of
-# the pseudo-CL estimator is mediated by a WorkspaceFlat case, initialized
-# by calling its compute_coupling_matrix method:
+
+fwhm = 180*60/10
+sigma = fwhm/2.355
+
+def FT_gaussian(x):
+	return np.exp(-(x**2)/2/sigma**2)/(np.sqrt(2*np.pi)*sigma)
+
+FT_ells = FT_gaussian(ells_uncoupled)
+
+f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc] ,beam=[ells_uncoupled, FT_ells])
+
+
 w00 = nmt.NmtWorkspaceFlat()
 w00.compute_coupling_matrix(f0, f0, b)
-# Workspaces can be saved to and read from disk to avoid recomputing them:
 w00.write_to("w00_flat.fits")
 w00.read_from("w00_flat.fits")
 
 
-# Computing power spectra:
-# As in the full-sky case, you compute the pseudo-CL estimator by
-# computing the coupled power spectra and then decoupling them by
-# inverting the mode-coupling matrix. This is done in two steps below,
-# but pymaster provides convenience routines to do this
-# through a single function call
 cl00_coupled = nmt.compute_coupled_cell_flat(f0, f0, b)
 cl00_uncoupled = w00.decouple_cell(cl00_coupled)[0]
+print(cl00_uncoupled)
+amp = abs((k**2)*cl00_uncoupled/(2*np.pi))**(1/2)
 
-"""
-cl02_coupled = nmt.compute_coupled_cell_flat(f0, f2, b)
-cl02_uncoupled = w02.decouple_cell(cl02_coupled)
-cl22_coupled = nmt.compute_coupled_cell_flat(f2, f2, b)
-cl22_uncoupled = w22.decouple_cell(cl22_coupled)
-"""
-# Let's look at the results!
+def power_law(x,a,p):
+    return a*np.power(x,p)
+
+a_fit, p_fit = curve_fit(power_law, lambdas_inv, amp, p0 = [1e-2,5/3])[0]
+
+lambdas_inv_curve = np.linspace(min(lambdas_inv),max(lambdas_inv),100)
+curve = power_law(lambdas_inv_curve, a_fit,p_fit)
+
 plt.figure()
-"""
-plt.plot(l, cl_tt, 'r-', label='Input TT')
-plt.plot(l, cl_ee, 'g-', label='Input EE')
-plt.plot(l, cl_bb, 'b-', label='Input BB')
-"""
-plt.plot(ells_uncoupled, cl00_uncoupled, 'r.', label='Uncoupled')
-#plt.plot(ells_uncoupled, cl22_uncoupled[0], 'g--')
-#plt.plot(ells_uncoupled, cl22_uncoupled[3], 'b--')
-plt.loglog()
-plt.xlabel("effective multipole")
-plt.ylabel("Angular power spectrum")
+plt.plot(lambdas_inv, amp, 'r.', label='Amplitude of power spectrum')
+plt.plot(lambdas_inv_curve, curve, 'b', label='Best fit: Power law (power = %1.2f)'%p_fit)
+plt.xlabel("$1/\lambda$ ($kpc^{-1}$)")
+plt.ylabel("Amplitude of power spectrum")
+plt.legend()
 plt.savefig("pymast_test.png", dpi = 400)
 plt.show()
+
+
+
+
+
+
+
+
 
