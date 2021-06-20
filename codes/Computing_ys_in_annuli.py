@@ -10,7 +10,8 @@ from astropy.io import fits
 pixsize = 1.7177432059  
 conv =  27.052 #kpc
 
-def get_2Dys_in_annuli():
+def get_2Dys_in_annuli(maxval):
+    
     f = fits.open('map2048_MILCA_Coma_20deg_G.fits')   
     data = f[1].data    #data is extracted
     
@@ -18,12 +19,19 @@ def get_2Dys_in_annuli():
     y=np.arange(700) # as above, NAXIS2=NAXIS1    
     X, Y = np.meshgrid(x, y) # takes your vectors and converts them to a grid
     
-    maxval = np.unravel_index(np.argmax(data), data.shape) # get the coordinates of the maximum
+    #maxval = np.unravel_index(np.argmax(data), data.shape) # get the coordinates of the maximum
     
-    R=np.sqrt((X-maxval[0])**2+(Y-maxval[1])**2) # calculate distance in pixel coordinates from the centre – note this should not be rounded
-        
-    r_initial = 0   #initial r taken to be 1 to avoid division by zero error 
-    r_final = 112    #final r taken to be of length 
+    #R=np.sqrt((X-maxval[0])**2+(Y-maxval[1])**2) # calculate distance in pixel coordinates from the centre – note this should not be rounded
+    
+    f = maxval[2]
+    theta = maxval[3]
+    
+    R_ellipse = np.sqrt((f*(np.cos(theta))**2 + 1/f*(np.sin(theta))**2)*(X - maxval[0])**2  \
+        + (f*(np.sin(theta))**2 + 1/f*(np.cos(theta))**2)*(Y - maxval[1])**2  \
+        + 2*(np.cos(theta))*(np.sin(theta))*(f-1/f)*(X - maxval[0])*(Y - maxval[1]))
+                                                              
+    r_initial = 0   
+    r_final = 180*2
     step_size = 3 #arcmin
     
     if (r_final-r_initial)%step_size==0:
@@ -40,7 +48,7 @@ def get_2Dys_in_annuli():
     
     while i<r_final:
     
-        in_ann=np.nonzero((R*pixsize>i) & (R*pixsize<(i+step_size)))
+        in_ann=np.nonzero((R_ellipse*pixsize>i) & (R_ellipse*pixsize<(i+step_size)))
         av=np.mean(data[in_ann])
         
         ys[t] = av
@@ -49,6 +57,6 @@ def get_2Dys_in_annuli():
         t+=1
         i+=step_size
     
-    return rs, ys, step_size
+    return rs, ys, step_size, maxval
      
     

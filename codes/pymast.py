@@ -96,7 +96,7 @@ plt.plot(lambdas_inv_curve, curve, 'b', label='Best fit: Power law (power = %1.2
 plt.xlabel("$1/\lambda$ ($kpc^{-1}$)")
 plt.ylabel("Amplitude of power spectrum")
 plt.legend()
-plt.savefig("pymast_test.png", dpi = 400)
+plt.savefig("power_spectrum.png", dpi = 400)
 plt.show()
 
 
