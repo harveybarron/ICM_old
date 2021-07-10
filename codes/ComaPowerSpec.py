@@ -3,6 +3,7 @@ import pymaster as nmt
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import os
+import scipy.integrate as si
 
 pixsize = 1.7177432059
 conv =  27.052 #kpc
@@ -15,6 +16,7 @@ Nx, Ny = len(y_fluc),  len(y_fluc)
 
 "------------------------------- CREATING MASKS -------------------------------"
 
+
 mask = np.zeros((Nx,Ny))
 cen_x, cen_y = Nx/2., Ny/2.
 cr = 60
@@ -24,7 +26,6 @@ dist = dist * pixsize
 idx = np.where(dist<=cr)
 theta_ap = 15 
 mask[idx]=1-np.exp(-9*(dist[idx]-cr)**2/(2*theta_ap**2))
-
 
 
 "---------------------------- PLOTTING APODIZED MASK --------------------------"
@@ -42,10 +43,11 @@ plt.show()
 
 "------------------------------ CREATING BINS ---------------------------------"
 
+
 bin_number = 6
 
-l_min = 180*60*conv/2000 
-l_max = 180*60*conv/500 
+l_min =  (180*60*conv/2000)
+l_max = (180*60*conv/500)
 
 bin_size = (l_max-l_min)/bin_number
 
@@ -56,58 +58,75 @@ for i in range (bin_number):
     l0_bins.append(l_min+bin_size*i)
     lf_bins.append(l_min+bin_size*(i+1))
 
-print("\n*************************  Bins  *************************************\n")
-print(l0_bins)
-print(lf_bins)
 
 b = nmt.NmtBinFlat(l0_bins, lf_bins)
 ells_uncoupled = b.get_effective_ells()
+
+
 print("\n************************  effective l's  *****************************\n")
 print(ells_uncoupled)
-lambdas_inv = 1/(conv*60*180/ells_uncoupled)
+
+lambdas_inv = ells_uncoupled/(conv*60*180)
 k = 2*np.pi*lambdas_inv
 
 "----------------------------- DEFINING BEAM ------------------------------------"
 
 
-def beam(x):
-    fwhm = 180*60/10  # in terms of l
-    Planck_sig = fwhm/2.355
-    return np.exp(-((x)**2)/(5.*Planck_sig**2))
+def beam(l):
+    Planck_res=10./60 
+    Planck_sig = Planck_res/2.3548
+    return np.exp(-0.5*l*(l+1)*(Planck_sig*np.pi/180)**2)
+    
 
 
 "----------------------------- PLOTTING FIELD WITH MASK -------------------------"
 
-f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc] ,beam=[ells_uncoupled, beam(ells_uncoupled)])
+bin_number = 200
+l_min = (180*60*conv/(120*conv))
+l_max = (180*60*conv/conv)
+bin_size = (l_max-l_min)/bin_number
+ls = []
+for i in range (bin_number):
+    ls.append(l_min+bin_size*(i+0.5))
 
+f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc] ,beam=[np.array(ls), beam(np.array(ls))])
+#,beam = [ells_uncoupled, beam(ells_uncoupled)])
 plt.figure()
 plt.imshow(f0.get_maps()[0] * mask, interpolation='nearest', origin='lower')
 plt.colorbar()
 plt.savefig('map with mask.png', dpi = 400)
 plt.show()
 
+
+
+print("\n--------------------------- ANGULAR POWER SPECTRUM ------------------------------------\n")
+
 w00 = nmt.NmtWorkspaceFlat()
 w00.compute_coupling_matrix(f0, f0, b)
-w00.write_to("w00_flat.fits")
-w00.read_from("w00_flat.fits")
 
 cl00_coupled = nmt.compute_coupled_cell_flat(f0, f0, b)
 cl00_uncoupled = w00.decouple_cell(cl00_coupled)[0]
-
-print("\n*************************  Power spectrum  *************************************\n")
 print(cl00_uncoupled)
-amp = abs((k**2)*cl00_uncoupled/(2*np.pi))**(1/2)
+
+amp = abs((ells_uncoupled**2)*cl00_uncoupled/(2*np.pi))**(1/2)
+
+
+
+print("\n*************************  Covariance matrix  *************************************\n")
 
 cw = nmt.NmtCovarianceWorkspaceFlat()
 cw.compute_coupling_coefficients(f0, f0, b)
 covar = nmt.gaussian_covariance_flat(cw, 0, 0, 0, 0, ells_uncoupled,
-                                     [cl00_coupled[0]], [cl00_coupled[0]],
-                                     [cl00_coupled[0]], [cl00_coupled[0]], w00)
+                                     [cl00_uncoupled], [cl00_uncoupled],
+                                     [cl00_uncoupled], [cl00_uncoupled], w00)
 
-print("\n*************************  Covariance matrix  *************************************\n")
 print(covar)
-std_power = np.sqrt(np.diag(covar))
-std_amp = abs((k**2)*std_power/(2*np.pi))**(1/2)
+std_power = (np.diag(covar))
+std_amp = np.sqrt(abs((ells_uncoupled**2)*std_power/(2*np.pi))**(1/2))
+
+
+
+"--------------------------------- Fitting a power law -------------------------------------"
 
 def power_law(x,a,p):
     return a*np.power(x,p)
@@ -117,10 +136,14 @@ a_fit, p_fit = curve_fit(power_law, lambdas_inv, amp, p0 = [1e-2,5/3])[0]
 lambdas_inv_curve = np.linspace(min(lambdas_inv),max(lambdas_inv),100)
 curve = power_law(lambdas_inv_curve, a_fit,p_fit)
 
+
+
+"------------------------- Plotting amplitude of Power Spectrum vs 1/lambda ---------------------------"
+
 plt.figure()
 plt.plot(lambdas_inv, amp, 'r.', label='Amplitude of power spectrum')
 plt.errorbar(lambdas_inv,amp, yerr=std_amp, fmt='r.',ecolor='black',elinewidth=1,
-             capsize = 4)
+            capsize = 4)
 plt.plot(lambdas_inv_curve, curve, 'b', 
          label='Best fit: Power law (power = %1.2f)'%p_fit)
 plt.xlabel("$1/\lambda$ ($kpc^{-1}$)")
@@ -129,6 +152,16 @@ plt.legend()
 plt.savefig("power_spectrum.png", dpi = 400)
 plt.show()
 
+
+
+print("\n---------------------------- PARSEVAL CHECK ---------------------------------\n")
+
+len_y_fluc = np.shape(y_fluc)
+MeanSq = np.sum((y_fluc-y_fluc.mean())**2)/(len_y_fluc[0]*len_y_fluc[1])
+print("Variance of map =",MeanSq)
+
+integral = si.simps(ells_uncoupled**2*cl00_uncoupled/k**2, k)
+print("Integral of P(k)dk = ",integral)
 
 
 
