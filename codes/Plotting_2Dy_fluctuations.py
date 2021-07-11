@@ -17,7 +17,21 @@ pixsize = 1.7177432059
 conv =  27.052 #kpc
 
 from Computing_ys_in_annuli import get_2Dys_in_annuli
-rs,ys,step_size,maxval = get_2Dys_in_annuli([352.42445296,349.85768166,1,0])
+
+"""
+For the original map, the optimal centre coordinates were:
+[x,y,f,theta] = [352.42445296,349.85768166,1,0] 
+The WCS of these coordinates were estimated
+
+    
+For the first and last maps used to calculate Cross power spectrum,
+the centre coordinates corresponding to the above estimated WCS were:
+[x,y,f,theta] =  [349.3,351.7,1,0]
+    
+"""
+
+#rs,ys,step_size,maxval = get_2Dys_in_annuli([352.42445296,349.85768166,1,0])
+rs,ys,step_size,maxval = get_2Dys_in_annuli([349.3,351.7,1,0])
 #rs,ys,step_size,maxval = get_2Dys_in_annuli([352.42445296,349.85768166,0.89232604,-0.63664394])
 #rs,ys,step_size,maxval = get_2Dys_in_annuli([352.4023856 , 350.23374859, 0.52490389, -0.51376102])
 ys_new = np.zeros(len(ys)+1)
@@ -26,7 +40,7 @@ rs_new = np.zeros(len(rs)+1)
 rs_new[1:] = rs
 ys_new[1:] = ys
 
-f = fits.open('map2048_MILCA_Coma_20deg_G.fits')
+f = fits.open('map2048_MILCA_Coma_20deg_last.fits')
 data = f[1].data
 
 x=np.arange(700) # where npix is the number of pixels in the x direction, ie NAXIS1 from the header
@@ -70,11 +84,11 @@ for i in x_ind[0]:
     t2 = 0
     t1 += 1
     
-file_norm_yfluc = open("normalised_y_fluc.txt","w+")
+file_norm_yfluc = open("normalised_y_fluc_last.txt","w+")
 np.savetxt(file_norm_yfluc, normalised_y_fluc)
 file_norm_yfluc.close()
 
-file_yfluc = open("y_fluc.txt","w+")
+file_yfluc = open("y_fluc_last.txt","w+")
 np.savetxt(file_yfluc, y_fluc)
 file_yfluc.close()
 
@@ -95,6 +109,7 @@ x_ticks = ['-2', '-1','0','1','2']
 y_ticks = ['-2', '-1','0','1','2']
 t11 = [0,35,70,105,138]
 
+plt.figure()
 plt.xticks(ticks=t11, labels=x_ticks, size='small')
 plt.yticks(ticks=t11, labels=y_ticks, size='small')
 
@@ -111,10 +126,12 @@ ax.add_patch(circ)
 plt.colorbar(pc)
 plt.xlabel("degrees")
 plt.ylabel("degrees")
-plt.title("y fluctuations in MILCA (f=0.89)")
-plt.savefig("figure 3.png", dpi = 400)
+plt.title("y fluctuations in MILCA (f=%2.2f)"%maxval[2])
+#plt.savefig("figure 3.png", dpi = 400)
 plt.show()
 
+
+plt.figure()
 plt.xticks(ticks=t11, labels=x_ticks, size='small')
 plt.yticks(ticks=t11, labels=y_ticks, size='small')
  
@@ -128,13 +145,8 @@ ax.add_patch(circ)
 plt.colorbar(pc)
 plt.xlabel("degrees")
 plt.ylabel("degrees")
-plt.title("normalised y fluctuations in MILCA (f=0.89)")
-plt.savefig("figure 4.png", dpi = 400)
+plt.title("normalised y fluctuations in MILCA (f=%2.2f)"%maxval[2])
+#plt.savefig("figure 4.png", dpi = 400)
 plt.show()
-
-
-
-
-
 
 
