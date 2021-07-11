@@ -92,9 +92,9 @@ ls = []
 for i in range (bin_number):
     ls.append(l_min+bin_size*(i+0.5))
 
-f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc_first] ,beam=[np.array(ls), beam(np.array(ls))])
-f1 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc_last] ,beam=[np.array(ls), beam(np.array(ls))])
-#,beam = [ells_uncoupled, beam(ells_uncoupled)])
+f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc_first] ,beam=[ells_uncoupled, beam(ells_uncoupled)])
+f1 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc_last] ,beam=[ells_uncoupled, beam(ells_uncoupled)])
+#,beam = [ells_uncoupled, beam(ells_uncoupled)]) np.array(ls), beam(np.array(ls))
 plt.figure()
 plt.imshow(f0.get_maps()[0] * mask, interpolation='nearest', origin='lower')
 plt.colorbar()
