@@ -8,11 +8,14 @@ import scipy.integrate as si
 pixsize = 1.7177432059
 conv =  27.052 #kpc
 
-y_fluc = np.loadtxt('y_fluc.txt')
+y_fluc_first = np.loadtxt('y_fluc_first.txt')
+y_fluc_last = np.loadtxt('y_fluc_last.txt')
 
 Lx = 4. * np.pi/180
 Ly = 4. * np.pi/180
-Nx, Ny = len(y_fluc),  len(y_fluc)
+
+#first and last maps are both of the same dimensions
+Nx, Ny = len(y_fluc_first),  len(y_fluc_first)
 
 "------------------------------- CREATING MASKS -------------------------------"
 
@@ -89,12 +92,13 @@ ls = []
 for i in range (bin_number):
     ls.append(l_min+bin_size*(i+0.5))
 
-f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc] ,beam=[np.array(ls), beam(np.array(ls))])
+f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc_first] ,beam=[np.array(ls), beam(np.array(ls))])
+f1 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc_last] ,beam=[np.array(ls), beam(np.array(ls))])
 #,beam = [ells_uncoupled, beam(ells_uncoupled)])
 plt.figure()
 plt.imshow(f0.get_maps()[0] * mask, interpolation='nearest', origin='lower')
 plt.colorbar()
-plt.savefig('map with mask.png', dpi = 400)
+plt.savefig('map with mask (first).png', dpi = 400)
 plt.show()
 
 
@@ -102,9 +106,9 @@ plt.show()
 print("\n--------------------------- ANGULAR POWER SPECTRUM ------------------------------------\n")
 
 w00 = nmt.NmtWorkspaceFlat()
-w00.compute_coupling_matrix(f0, f0, b)
+w00.compute_coupling_matrix(f0, f1, b)
 
-cl00_coupled = nmt.compute_coupled_cell_flat(f0, f0, b)
+cl00_coupled = nmt.compute_coupled_cell_flat(f0, f1, b)
 cl00_uncoupled = w00.decouple_cell(cl00_coupled)[0]
 print(cl00_uncoupled)
 
@@ -115,7 +119,7 @@ amp = abs((ells_uncoupled**2)*cl00_uncoupled/(2*np.pi))**(1/2)
 print("\n*************************  Covariance matrix  *************************************\n")
 
 cw = nmt.NmtCovarianceWorkspaceFlat()
-cw.compute_coupling_coefficients(f0, f0, b)
+cw.compute_coupling_coefficients(f0, f1, b)
 covar = nmt.gaussian_covariance_flat(cw, 0, 0, 0, 0, ells_uncoupled,
                                      [cl00_uncoupled], [cl00_uncoupled],
                                      [cl00_uncoupled], [cl00_uncoupled], w00)
@@ -149,20 +153,22 @@ plt.plot(lambdas_inv_curve, curve, 'b',
 plt.xlabel("$1/\lambda$ ($kpc^{-1}$)")
 plt.ylabel("Amplitude of power spectrum")
 plt.legend()
-plt.title("Power Spectrum of Coma")
-plt.savefig("power_spectrum.png", dpi = 400)
+plt.title("Cross Power Spectrum of Coma")
+plt.savefig("power_spectrum (cross).png", dpi = 400)
 plt.show()
 
 
 
 print("\n---------------------------- PARSEVAL CHECK ---------------------------------\n")
 
-len_y_fluc = np.shape(y_fluc)
-MeanSq = np.sum((y_fluc-y_fluc.mean())**2)/(len_y_fluc[0]*len_y_fluc[1])
+len_y_fluc = np.shape(y_fluc_first)
+MeanSq = np.sum((y_fluc_first-y_fluc_first.mean())**2)/(len_y_fluc[0]*len_y_fluc[1])
 print("Variance of map =",MeanSq)
 
 integral = si.simps(ells_uncoupled**2*cl00_uncoupled/k**2, k)
 print("Integral of P(k)dk = ",integral)
+
+
 
 
 
