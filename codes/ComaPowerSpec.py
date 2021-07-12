@@ -158,11 +158,11 @@ plt.show()
 print("\n---------------------------- PARSEVAL CHECK ---------------------------------\n")
 
 len_y_fluc = np.shape(y_fluc)
-MeanSq = np.sum((y_fluc-y_fluc.mean())**2)/(len_y_fluc[0]*len_y_fluc[1])
-print("Variance of map =",MeanSq)
+variance = np.sum((y_fluc-y_fluc.mean())**2)/(len_y_fluc[0]*len_y_fluc[1])
+print("Variance of map =",variance)
 
-integral = si.simps(ells_uncoupled**2*cl00_uncoupled/k**2, k)
-print("Integral of P(k)dk = ",integral)
+meanSq = np.sum(amp**2)/len(amp)
+print("Average of amplitude^2 of power = ",meanSq)
 
 
 
