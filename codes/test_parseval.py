@@ -41,7 +41,7 @@ plt.xlim(0,3)
 plt.show()
 
 print("\nParseval's theorem check for Power Spectrum using periodogram: \n")
-print ("Variance of signak:",parseval_1/N) 
+print ("Variance of signal:",parseval_1/N) 
 print ("Integral of P(f)df =",parseval_2_3)
 
 plt.figure()
@@ -121,12 +121,12 @@ k = 2*np.pi*lambdas_inv
 amp = abs((ells_uncoupled**2)*cl00_uncoupled/(2*np.pi))**(1/2)
 
 print("\nParseval's theorem check for Power Spectrum using NaMaster: \n")
-parseval_4_4 = si.simps(cl00_uncoupled, ells_uncoupled)
+parseval_4_4 = si.simps(cl00_uncoupled*(2*ells_uncoupled+1), ells_uncoupled)
 parseval_4_5 = np.sum(cl00_uncoupled)
 
 print("Variance of map:",parseval_3/(Nx*Ny))
-print("Integral = ",parseval_4_4)
-print("Summation=",parseval_4_5)
+print("Integral of Cl(2l+1) dl = ",parseval_4_4)
+print("Summation of Cl =",parseval_4_5)
 
 plt.figure()
 plt.plot(ells_uncoupled, cl00_uncoupled, 'r-', label='Uncoupled, no beam')
