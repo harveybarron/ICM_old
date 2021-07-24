@@ -8,14 +8,14 @@ import scipy.integrate as si
 pixsize = 1.7177432059
 conv =  27.052 #kpc
 
-y_fluc_first = np.loadtxt('y_fluc_first.txt')
-y_fluc_last = np.loadtxt('y_fluc_last.txt')
+norm_y_fluc_first = np.loadtxt('normalised_y_fluc_first.txt')
+norm_y_fluc_last = np.loadtxt('normalised_y_fluc_last.txt')
 
 Lx = 4. * np.pi/180
 Ly = 4. * np.pi/180
 
 #first and last maps are both of the same dimensions
-Nx, Ny = len(y_fluc_first),  len(y_fluc_first)
+Nx, Ny = len(norm_y_fluc_first),  len(norm_y_fluc_first)
 
 "------------------------------- CREATING MASKS -------------------------------"
 
@@ -92,8 +92,8 @@ ls = []
 for i in range (bin_number):
     ls.append(l_min+bin_size*(i+0.5))
 
-f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc_first] ,beam=[ells_uncoupled, beam(ells_uncoupled)])
-f1 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc_last] ,beam=[ells_uncoupled, beam(ells_uncoupled)])
+f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [norm_y_fluc_first] ,beam=[ells_uncoupled, beam(ells_uncoupled)])
+f1 = nmt.NmtFieldFlat(Lx, Ly, mask, [norm_y_fluc_last] ,beam=[ells_uncoupled, beam(ells_uncoupled)])
 #,beam = [ells_uncoupled, beam(ells_uncoupled)]) np.array(ls), beam(np.array(ls))
 plt.figure()
 plt.imshow(f0.get_maps()[0] * mask, interpolation='nearest', origin='lower')
@@ -149,11 +149,11 @@ plt.plot(lambdas_inv, amp, 'r.', label='Amplitude of power spectrum')
 plt.errorbar(lambdas_inv,amp, yerr=std_amp, fmt='r.',ecolor='black',elinewidth=1,
             capsize = 4)
 plt.plot(lambdas_inv_curve, curve, 'b', 
-         label='Best fit: Power law (power = %1.2f)'%p_fit)
+          label='Best fit: Power law (power = %1.2f)'%p_fit)
 plt.xlabel("$1/\lambda$ ($kpc^{-1}$)")
 plt.ylabel("Amplitude of power spectrum")
 plt.legend()
-plt.title("Cross Power Spectrum of Coma")
+plt.title("Cross Power Spectrum of normalised map")
 plt.savefig("power_spectrum (cross).png", dpi = 400)
 plt.show()
 
@@ -161,14 +161,39 @@ plt.show()
 
 print("\n---------------------------- PARSEVAL CHECK ---------------------------------\n")
 
-len_y_fluc = np.shape(y_fluc_first)
-MeanSq = np.sum((y_fluc_first-y_fluc_first.mean())**2)/(len_y_fluc[0]*len_y_fluc[1])
+len_y_fluc = np.shape(norm_y_fluc_first)
+MeanSq = np.sum((norm_y_fluc_first-norm_y_fluc_first.mean())**2)/(len_y_fluc[0]*len_y_fluc[1])
 print("Variance of map =",MeanSq)
 
 integral = si.simps(ells_uncoupled**2*cl00_uncoupled/k**2, k)
 print("Integral of P(k)dk = ",integral)
 
+print("\n----------------- PRESSURE POWER SPECTRUM ---------------------------------\n")
 
+Ns = np.loadtxt("Ns.txt")
+#Ns = 7e-4*np.ones_like(Ns)
+amp_pressure = np.zeros((1500,6))
+
+for i in range(500,2000):
+    amp_pressure[i-500,:] = abs((ells_uncoupled**2)*cl00_uncoupled*k/(2*np.pi**2*Ns[i]))**(1/2)
+
+
+plt.figure()
+plt.errorbar(lambdas_inv,amp_pressure[0], yerr=std_amp*(k/Ns[0]/np.pi)**(1/2), fmt='r.',ecolor='black',elinewidth=1,
+            capsize = 4,label="theta = 0 kpc")
+# plt.errorbar(lambdas_inv+1e-5,amp_pressure[500], yerr=std_amp*(k/Ns[500]/np.pi)**(1/2), fmt='b.',ecolor='black',elinewidth=1,
+#              capsize = 4,label="theta = 1000 kpc")
+plt.errorbar(lambdas_inv+2e-5,amp_pressure[1000], yerr=std_amp*(k/Ns[1000]/np.pi)**(1/2), fmt='g.',ecolor='black',elinewidth=1,
+             capsize = 4, label='theta = 1500 kpc')
+plt.errorbar(lambdas_inv-1e-5,amp_pressure[1499], yerr=std_amp*(k/Ns[1499]/np.pi)**(1/2), fmt='.',ecolor='black',elinewidth=1,
+             capsize = 4, label='theta = 2000 kpc')
+plt.xlabel("$1/\lambda$ ($kpc^{-1}$)")
+plt.ylabel("Amplitude of pressure power spectrum")
+plt.legend()
+plt.title("Pressure Power Spectrum (cross) of Coma")
+plt.savefig("PS_pressure (cross).png", dpi = 400)
+plt.loglog()
+plt.show()
 
 
 

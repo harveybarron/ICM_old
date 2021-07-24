@@ -8,11 +8,11 @@ import scipy.integrate as si
 pixsize = 1.7177432059
 conv =  27.052 #kpc
 
-y_fluc = np.loadtxt('y_fluc.txt')
+norm_y_fluc = np.loadtxt('normalised_y_fluc.txt')
 
 Lx = 4. * np.pi/180
 Ly = 4. * np.pi/180
-Nx, Ny = len(y_fluc),  len(y_fluc)
+Nx, Ny = len(norm_y_fluc),  len(norm_y_fluc)
 
 "------------------------------- CREATING MASKS -------------------------------"
 
@@ -89,7 +89,7 @@ ls = []
 for i in range (bin_number):
     ls.append(l_min+bin_size*(i+0.5))
 
-f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [y_fluc] ,beam=[ells_uncoupled, beam(ells_uncoupled)])
+f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [norm_y_fluc] ,beam=[ells_uncoupled, beam(ells_uncoupled)])
 #,beam = [ells_uncoupled, beam(ells_uncoupled)]) np.array(ls), beam(np.array(ls))
 plt.figure()
 plt.imshow(f0.get_maps()[0] * mask, interpolation='nearest', origin='lower')
@@ -128,13 +128,13 @@ std_amp = np.sqrt(abs((ells_uncoupled**2)*std_power/(2*np.pi))**(1/2))
 
 "--------------------------------- Fitting a power law -------------------------------------"
 
-def power_law(x,a,p):
-    return a*np.power(x,p)
+# def power_law(x,a,p):
+#     return a*np.power(x,p)
 
-a_fit, p_fit = curve_fit(power_law, lambdas_inv, amp, p0 = [1e-2,5/3])[0]
+# a_fit, p_fit = curve_fit(power_law, lambdas_inv, amp, p0 = [1e-2,5/3])[0]
 
-lambdas_inv_curve = np.linspace(min(lambdas_inv),max(lambdas_inv),100)
-curve = power_law(lambdas_inv_curve, a_fit,p_fit)
+# lambdas_inv_curve = np.linspace(min(lambdas_inv),max(lambdas_inv),100)
+# curve = power_law(lambdas_inv_curve, a_fit,p_fit)
 
 
 
@@ -144,12 +144,12 @@ plt.figure()
 plt.plot(lambdas_inv, amp, 'r.', label='Amplitude of power spectrum')
 plt.errorbar(lambdas_inv,amp, yerr=std_amp, fmt='r.',ecolor='black',elinewidth=1,
             capsize = 4)
-plt.plot(lambdas_inv_curve, curve, 'b', 
-         label='Best fit: Power law (power = %1.2f)'%p_fit)
+# plt.plot(lambdas_inv_curve, curve, 'b', 
+#          label='Best fit: Power law (power = %1.2f)'%p_fit)
 plt.xlabel("$1/\lambda$ ($kpc^{-1}$)")
 plt.ylabel("Amplitude of power spectrum")
 plt.legend()
-plt.title("Power Spectrum of Coma")
+plt.title("Power Spectrum of normalised map")
 plt.savefig("power_spectrum.png", dpi = 400)
 plt.show()
 
@@ -157,12 +157,47 @@ plt.show()
 
 print("\n---------------------------- PARSEVAL CHECK ---------------------------------\n")
 
-len_y_fluc = np.shape(y_fluc)
-variance = np.sum((y_fluc-y_fluc.mean())**2)/(len_y_fluc[0]*len_y_fluc[1])
+len_norm_y_fluc = np.shape(norm_y_fluc)
+variance = np.sum((norm_y_fluc-norm_y_fluc.mean())**2)/(len_norm_y_fluc[0]*len_norm_y_fluc[1])
 print("Variance of map =",variance)
 
 meanSq = np.sum(amp**2)/len(amp)
 print("Average of amplitude^2 of power = ",meanSq)
+
+print("\n----------------- PRESSURE POWER SPECTRUM ---------------------------------\n")
+
+Ns = np.loadtxt("Ns.txt")
+#Ns = 7e-4*np.ones_like(Ns)
+amp_pressure = np.zeros((1500,6))
+
+for i in range(500,2000):
+    amp_pressure[i-500,:] = abs((ells_uncoupled**2)*cl00_uncoupled*k/(2*np.pi**2*Ns[i]))**(1/2)
+
+
+plt.figure()
+plt.errorbar(lambdas_inv,amp_pressure[0], yerr=std_amp*(k/Ns[0]/np.pi)**(1/2), fmt='r.',ecolor='black',elinewidth=1,
+            capsize = 4,label="theta = 500 kpc")
+# plt.errorbar(lambdas_inv+1e-5,amp_pressure[500], yerr=std_amp*(k/Ns[500]/np.pi)**(1/2), fmt='b.',ecolor='black',elinewidth=1,
+#             capsize = 4,label="theta = 1000 kpc")
+# plt.errorbar(lambdas_inv+2e-5,amp_pressure[1000], yerr=std_amp*(k/Ns[1000]/np.pi)**(1/2), fmt='g.',ecolor='black',elinewidth=1,
+#             capsize = 4, label='theta = 1500 kpc')
+plt.errorbar(lambdas_inv-1e-5,amp_pressure[1499], yerr=std_amp*(k/Ns[1499]/np.pi)**(1/2), fmt='.',ecolor='black',elinewidth=1,
+            capsize = 4, label='theta = 2000 kpc')
+plt.xlabel("$1/\lambda$ ($kpc^{-1}$)")
+plt.ylabel("Amplitude of pressure power spectrum")
+plt.legend()
+plt.title("Pressure Power Spectrum of Coma")
+plt.savefig("PS_pressure.png", dpi = 400)
+plt.loglog()
+plt.show()
+
+
+
+
+
+
+
+
 
 
 

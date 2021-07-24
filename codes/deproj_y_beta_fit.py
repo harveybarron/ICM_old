@@ -2,14 +2,19 @@ import numpy as np
 from numpy import linalg
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
+from scipy.integrate import quad,dblquad
 
 from Computing_ys_in_annuli import get_2Dys_in_annuli
 rs, ys, step_size, maxval = get_2Dys_in_annuli([352.42445296,349.85768166,1,0])
 
 pixsize = 1.7177432059    
 conv =  27.052 #kpc
+arcmin2kpc=81./3
+Planck_res=10.*arcmin2kpc
+Planck_sig=Planck_res/2./np.sqrt(2*np.log(2.))
 
 rmid = rs
+ys = ys
 rstep = step_size
 
 Rproj=np.zeros((len(rmid), len(rmid)))
@@ -31,9 +36,37 @@ for i, ri in enumerate(rmid):
       print(i,j,Vint1,Vint2,Vint3,Vint4)
     Rproj[i,j+i]=Vint/(rii**2-rim1**2)
     
+
+# def gaussian(y, x, x0, y0, sig):                                      
+#     return np.exp(-((x-x0)**2+(y-y0)**2)/2/sig**2)  
+
+# def gauss_in_annulus(y0, sig, r1, r2):
+#   # Break into pieces to enable integration within circular boundaries
+#   int1=dblquad(gaussian, -r1, r1, lambda x: np.sqrt(r1**2-x**2), lambda x: np.sqrt(r2**2-x**2), args=(0, y0, sig))[0]
+#   int2=dblquad(gaussian, -r1, r1, lambda x: -np.sqrt(r2**2-x**2), lambda x: -np.sqrt(r1**2-x**2), args=(0, y0, sig))[0]
+#   int3=dblquad(gaussian, -r2, -r1, lambda x: 0, lambda x: np.sqrt(r2**2-x**2), args=(0, y0, sig))[0]
+#   int4=dblquad(gaussian, -r2, -r1, lambda x: -np.sqrt(r2**2-x**2), lambda x: 0, args=(0, y0, sig))[0]
+#   return (int1+int2+int3*2+int4*2)/(2*np.pi*sig**2)
+
+# def av_gauss_in_annulus_integrand(r, sig, r1, r2):
+#   return gauss_in_annulus(r, sig, r1, r2)*2*np.pi*r
+
+# # Annulus integrand works in all cases incl innermost circle
+# Rpsf=np.zeros((len(rmid), len(rmid)))
+# for i, ri in enumerate(rmid):
+#   print(".",end="")
+#   rim1=ri-rstep/2.
+#   rii=ri+rstep/2.
+#   for j, rj in enumerate(rmid):
+#     rjm1=rj-rstep/2.
+#     rjj=rj+rstep/2.
+#     # Amount of flux from j'th annulus thrown into i'th annulus
+#     Rpsf[i,j]=quad(av_gauss_in_annulus_integrand, rjm1, rjj, args=(Planck_sig, rim1, rii))[0]/(np.pi*(rii**2-rim1**2))
+
+# Rpsf_inv=linalg.inv(Rpsf)
+
 Rproj_inv = linalg.inv(Rproj)
-y_deproj=np.matmul(Rproj_inv, ys.reshape(-1,1))
-y_deproj=np.squeeze(y_deproj)
+y_deproj=np.squeeze(np.matmul(Rproj_inv, ys.reshape(-1,1)))
 
 def beta_model(x,a,b,c):
     return a/(1+(x/b)**2)**c
