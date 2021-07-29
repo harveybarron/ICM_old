@@ -60,7 +60,7 @@ data2 = np.sin(pi*X)+2*np.sin(pi*2*Y)
 plt.figure()
 plt.imshow(data2,interpolation='nearest')
 plt.colorbar()
-plt.savefig("2D test map.png",dpi=400)
+plt.savefig("../images/2D test map.png",dpi=400)
 plt.show()
 
 fourier_data2 = np.abs(np.fft.fft2(data2))
@@ -78,7 +78,7 @@ print(parseval_4_1)
 plt.figure()
 plt.imshow(fourier_shift)
 plt.colorbar()
-plt.savefig("2D test map FT.png",dpi=400)
+plt.savefig("../images/2D test map FT.png",dpi=400)
 plt.show()
 
 import pymaster as nmt
@@ -94,11 +94,10 @@ Ly = Ny*pix * np.pi/180
 mask=np.ones_like(data2)
 f0 = nmt.NmtFieldFlat(Lx, Ly, mask, [data2])
 
-
 bin_number = 100
 
-l_min = 0 # (180*60*conv/2000)
-l_max = 7000 # (180*60*conv/500)
+l_min = 0 
+l_max = 7000 
 
 bin_size = (l_max-l_min)/bin_number
 
@@ -131,10 +130,5 @@ print("Summation of Cl =",parseval_4_5)
 plt.figure()
 plt.plot(ells_uncoupled, cl00_uncoupled, 'r-', label='Uncoupled, no beam')
 plt.title("Using NaMaster")
-plt.savefig("2D test map power using NaMaster.png",dpi=400)
+plt.savefig("../images/2D test map power using NaMaster.png",dpi=400)
 plt.show()
-
-
-
-
-

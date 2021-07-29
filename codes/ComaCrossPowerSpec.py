@@ -80,6 +80,11 @@ k = 2*np.pi*lambdas_inv
 
 "----------------------------- DEFINING BEAM ------------------------------------"
 #refer to beam_test.py
+"""params:
+    -> l: array-like; ell values 
+   returns:
+    -> array-like; value of beam at those ells
+"""
 def beam(l):
     Planck_res=10./60 
     Planck_sig = Planck_res/2.3548

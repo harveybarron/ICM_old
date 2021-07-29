@@ -71,7 +71,7 @@ y_deproj=np.squeeze(np.matmul(Rproj_inv, ys.reshape(-1,1)))
 def beta_model(x,a,b,c):
     return a/(1+(x/b)**2)**c
 
-idx = np.where (rs<(1800/conv))
+idx = np.where (rs<(2000/conv))
 rs_fit = rs[idx]
 ys_fit = y_deproj[idx]
 
@@ -87,16 +87,15 @@ for i,ri in enumerate (rmid):
 print("\n")    
 print("p0 = "+str(a_fit)+"  r_c = " +str(conv*b_fit) + "  beta* = " +str(c_fit)+ "\n")
 
-plt.plot(rmid*conv, y_deproj, '.', label='deprojected with Rproj^-1')
-plt.plot(rmid*conv, beta_fit, label = 'Beta-model fit with beta = %1.3f'%c_fit)
+idx_plot = np.where (rs<(3000/conv)) #for plotting upto 3000 kpc
+
+plt.plot(rmid[idx_plot]*conv, y_deproj[idx_plot], 'o', markersize='4', label='deprojected with Rproj^-1')
+plt.plot(rmid[idx_plot]*conv, beta_fit[idx_plot], label = 'Beta-model fit with beta = %1.3f'%c_fit)
 #plt.plot(rmid,ys,label='2D ys')
 plt.legend(loc='best')
+plt.xlabel("Distance from centre of cluster (kpc)" ,fontsize=11)
+plt.ylabel("Average deprojected y profile" ,fontsize=11)
+plt.title("Deprojected y profile in bins of 3 arcmin", fontsize=13)
+plt.loglog()
+plt.savefig("../images/deprojected ys.png",dpi=400)
 plt.show()
-
-
-
-
-
-
-
-

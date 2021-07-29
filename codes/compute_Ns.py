@@ -3,7 +3,7 @@
    -> Calculate the window function for different values of physical distances 
    theta (Khatri figure 7)
    -> Does a partial fourier tranform (wrt z) for each theta 
-   -> Computes N's integrating over k_z as a function of theta and finally plots it
+   -> Computes N's as a function of theta integrating over k_z and finally plots it
 
 """
 
