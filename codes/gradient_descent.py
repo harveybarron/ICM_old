@@ -16,7 +16,7 @@ from astropy.io import fits
 from Computing_ys_in_annuli import get_2Dys_in_annuli
 
 pixsize = 1.7177432059   #size of 1 pixel in arcmin
-conv =  27.052     # conversion factor from arcmin to kpc
+arcmin2kpc =  27.052     # conversion factor from arcmin to kpc
 f = fits.open('map2048_MILCA_Coma_20deg_G.fits')
 data = f[1].data
 

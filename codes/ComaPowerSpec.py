@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 pixsize = 1.7177432059  #size of 1 pixel in arcmin
-conv =  27.052 # conversion factor from arcmin to kpc
+arcmin2kpc =  27.052 # conversion factor from arcmin to kpc
 
 norm_y_fluc = np.loadtxt('../data/normalised_y_fluc.txt')
 
@@ -74,8 +74,8 @@ plt.show()
 bin_number = 6
 #l's have to be converted from kpc using l = pi/angular sep
 # We want to use bin sizes between 500 and 2000 kpc in terms of l's
-l_min =  (180*60*conv/2000)
-l_max = (180*60*conv/500)
+l_min =  (180*60*arcmin2kpc/2000)
+l_max = (180*60*arcmin2kpc/500)
 
 bin_size = (l_max-l_min)/bin_number
 
@@ -92,7 +92,7 @@ b = nmt.NmtBinFlat(l0_bins, lf_bins)
 ells_uncoupled = b.get_effective_ells()
 print(ells_uncoupled)
 
-lambdas_inv = ells_uncoupled/(conv*60*180)
+lambdas_inv = ells_uncoupled/(arcmin2kpc*60*180)
 k = 2*np.pi*lambdas_inv
 
 "----------------------------- DEFINING BEAM ------------------------------------"

@@ -1,3 +1,13 @@
+"""
+This script:
+    -> Computes y values in bins calling the 'get_2Dys_in_annuli' function
+    -> Computes the projection matrix for the returned annuli. The projection
+       matrix is computed using equation A1 and A2 of MacLaughlin et al.(1999). 
+       Refer to the report and the paper for more details.
+    -> The PSF matrix can also be incorporated once the issues have been fixed.
+       Refer to 'test_deproj.py' for details.
+    -> Fits a beta model to the deprojected y values and plots it.
+"""
 import numpy as np
 from numpy import linalg
 import matplotlib.pyplot as plt
@@ -5,16 +15,14 @@ import scipy.optimize as opt
 from scipy.integrate import quad,dblquad
 
 from Computing_ys_in_annuli import get_2Dys_in_annuli
+#the centre values have been optimized using gradient_descent.py 
 rs, ys, step_size, maxval = get_2Dys_in_annuli([352.42445296,349.85768166,1,0])
 
-pixsize = 1.7177432059    
-conv =  27.052 #kpc
-arcmin2kpc=81./3
+pixsize = 1.7177432059   #size of 1 pixel in arcmin  
+arcmin2kpc =  27.052  # conversion factor from arcmin to kpc
 Planck_res=10.*arcmin2kpc
 Planck_sig=Planck_res/2./np.sqrt(2*np.log(2.))
-
 rmid = rs
-ys = ys
 rstep = step_size
 
 Rproj=np.zeros((len(rmid), len(rmid)))
@@ -36,6 +44,7 @@ for i, ri in enumerate(rmid):
       print(i,j,Vint1,Vint2,Vint3,Vint4)
     Rproj[i,j+i]=Vint/(rii**2-rim1**2)
     
+"COMPUTATION OF PSF MATRIX. Refer to 'test_deproj.py' for details."
 
 # def gaussian(y, x, x0, y0, sig):                                      
 #     return np.exp(-((x-x0)**2+(y-y0)**2)/2/sig**2)  
@@ -68,14 +77,22 @@ for i, ri in enumerate(rmid):
 Rproj_inv = linalg.inv(Rproj)
 y_deproj=np.squeeze(np.matmul(Rproj_inv, ys.reshape(-1,1)))
 
+"""params:
+    -> x: The radius at which the value is to be evaluated
+    -> a: The value of the model at the centre
+    -> b: The scale of the model; 2D: Theta_c, 3D: r_c
+    -> c: The beta value of the model
+  returns:
+    -> The value predicted by the model
+"""
 def beta_model(x,a,b,c):
     return a/(1+(x/b)**2)**c
-
-idx = np.where (rs<(2000/conv))
+#Fitting done only for y's less than 2000 kpc (Khatri+ uses 1200 kpc but the parameters are not too sensitive to that)
+idx = np.where (rs<(2000/arcmin2kpc))
 rs_fit = rs[idx]
 ys_fit = y_deproj[idx]
 
-constants = opt.curve_fit(beta_model, rs_fit, ys_fit,p0=[6e-5,400/conv,1.05])[0]
+constants = opt.curve_fit(beta_model, rs_fit, ys_fit,p0=[6e-5,400/arcmin2kpc,1.05])[0] #some inital parameter values given
 a_fit = constants[0]
 b_fit = constants[1]
 c_fit = constants[2]
@@ -85,12 +102,12 @@ for i,ri in enumerate (rmid):
     beta_fit[i] = beta_model(ri, a_fit, b_fit, c_fit )
     
 print("\n")    
-print("p0 = "+str(a_fit)+"  r_c = " +str(conv*b_fit) + "  beta* = " +str(c_fit)+ "\n")
+print("p0 = "+str(a_fit)+"  r_c = " +str(arcmin2kpc*b_fit) + "  beta* = " +str(c_fit)+ "\n")
 
-idx_plot = np.where (rs<(3000/conv)) #for plotting upto 3000 kpc
+idx_plot = np.where (rs<(3000/arcmin2kpc)) #for plotting upto 3000 kpc
 
-plt.plot(rmid[idx_plot]*conv, y_deproj[idx_plot], 'o', markersize='4', label='deprojected with Rproj^-1')
-plt.plot(rmid[idx_plot]*conv, beta_fit[idx_plot], label = 'Beta-model fit with beta = %1.3f'%c_fit)
+plt.plot(rmid[idx_plot]*arcmin2kpc, y_deproj[idx_plot], 'o', markersize='4', label='deprojected with Rproj^-1')
+plt.plot(rmid[idx_plot]*arcmin2kpc, beta_fit[idx_plot], label = 'Beta-model fit with beta = %1.3f'%c_fit)
 #plt.plot(rmid,ys,label='2D ys')
 plt.legend(loc='best')
 plt.xlabel("Distance from centre of cluster (kpc)" ,fontsize=11)

@@ -28,7 +28,6 @@ from astropy.io import fits
 import matplotlib.patches as patches
 
 pixsize = 1.7177432059
-conv =  27.052 #kpc
 
 from Computing_ys_in_annuli import get_2Dys_in_annuli
 

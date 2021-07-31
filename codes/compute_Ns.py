@@ -13,7 +13,7 @@ import scipy.fftpack as fftpack
 import scipy.integrate as si
 
 pixsize = 1.7177432059   #size of 1 pixel in arcmin  
-conv =  27.052  # conversion factor from arcmin to kpc
+arcmin2kpc =  27.052  # conversion factor from arcmin to kpc
 
 m,c,sigma_T = 9.1093e-31, 299792458, 6.652e-29  #electron mass, speed of light and Thompson cross-section
 
@@ -45,7 +45,7 @@ params:
 """
 def windowFunc(theta,z):
     w = (p0/y0)*(1+theta**2/theta_c**2)**(beta1)/(1+(theta**2+z**2)/r_c**2)**(beta2)
-    return w/conv
+    return w/arcmin2kpc
 
 zs = np.arange(-2000,2000,1)
 ws1 = windowFunc(0,zs)
