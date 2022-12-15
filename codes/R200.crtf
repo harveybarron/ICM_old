@@ -1,0 +1,5 @@
+#CRTFv0
+global coord=GALACTIC
+global color=black
+
+ann ellipse[[57.3deg,87.99deg],[96.85arcmin,96.85arcmin],0deg]

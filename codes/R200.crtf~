@@ -1,0 +1,5 @@
+#CRTF
+global coord=J2000
+global color=cyan
+
+ann ellipse[[17:20:09.93,+26.37.31.42],[45arcsec,45arcsec],0deg]

@@ -1,0 +1,22 @@
+taskname           = "imstat"
+imagename          =  "map2048_MILCA_Coma_20deg_G.fits"
+axes               =  -1
+region             =  ""
+box                =  ""
+chans              =  ""
+stokes             =  ""
+listit             =  True
+verbose            =  True
+mask               =  ""
+stretch            =  False
+logfile            =  ""
+append             =  True
+algorithm          =  "classic"
+fence              =  -1
+center             =  "mean"
+lside              =  True
+zscore             =  -1
+maxiter            =  -1
+clmethod           =  "auto"
+niter              =  3
+#imstat(imagename="map2048_MILCA_Coma_20deg_G.fits",axes=-1,region="",box="",chans="",stokes="",listit=True,verbose=True,mask="",stretch=False,logfile="",append=True,algorithm="classic",fence=-1,center="mean",lside=True,zscore=-1,maxiter=-1,clmethod="auto",niter=3)

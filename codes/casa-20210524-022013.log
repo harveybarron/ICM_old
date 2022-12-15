@@ -1,0 +1,39 @@
+
+2021-05-24 02:20:15	INFO	::casa	
+2021-05-24 02:20:15	INFO	::casa	CASA Version 5.3.0-143  
+2021-05-24 02:20:22	INFO	imstat::::	
+2021-05-24 02:20:22	INFO	imstat::::+	##########################################
+2021-05-24 02:20:22	INFO	imstat::::+	##### Begin Task: imstat             #####
+2021-05-24 02:20:22	INFO	imstat::::	imstat(imagename="map2048_MILCA_Coma_20deg_G.fits",axes=-1,region="",box="",chans="",
+2021-05-24 02:20:22	INFO	imstat::::+	        stokes="",listit=True,verbose=True,mask="",stretch=False,
+2021-05-24 02:20:22	INFO	imstat::::+	        logfile="",append=True,algorithm="classic",fence=-1,center="mean",
+2021-05-24 02:20:22	INFO	imstat::::+	        lside=True,zscore=-1,maxiter=-1,clmethod="auto",niter=3)
+2021-05-24 02:20:22	INFO	imstat::::	FITS card 13: CRPIX1  =                  351                                                  
+2021-05-24 02:20:22	INFO	imstat::::	Keyword value has wrong data type.
+2021-05-24 02:20:22	INFO	imstat::::	... converted to type double.
+2021-05-24 02:20:22	INFO	imstat::::	FITS card 18: CRPIX2  =                  351                                                  
+2021-05-24 02:20:22	INFO	imstat::::	Keyword value has wrong data type.
+2021-05-24 02:20:22	INFO	imstat::::	... converted to type double.
+2021-05-24 02:20:22	INFO	imstat::::	FITS card 13: CRPIX1  =                  351                                                  
+2021-05-24 02:20:22	INFO	imstat::::	Keyword value has wrong data type.
+2021-05-24 02:20:22	INFO	imstat::::	... converted to type double.
+2021-05-24 02:20:22	INFO	imstat::::	FITS card 18: CRPIX2  =                  351                                                  
+2021-05-24 02:20:22	INFO	imstat::::	Keyword value has wrong data type.
+2021-05-24 02:20:22	INFO	imstat::::	... converted to type double.
+2021-05-24 02:20:22	INFO	imstat::FITSCoordinateUtil::fromFITSHeader	passing empty or nonexistant spectral Coordinate axis
+2021-05-24 02:20:22	WARN	imstat::FITSImage::getImageAttributes (file ../../images/Images/FITSImage.cc, line 726)	FITS unit "COMPTON-Y" unknown to CASA - will treat it as non-dimensional.
+2021-05-24 02:20:22	WARN	imstat::FITSImage::getImageAttributes (file ../../images/Images/FITSImage.cc, line 726)+	 See http://fits.gsfc.nasa.gov/fits_standard.html for a list of valid units.
+2021-05-24 02:20:22	INFO	imstat::CasacRegionManager::fromBCS	No directional region specified. Using full positional plane.
+2021-05-24 02:20:22	INFO	imstat::image::statistics 	Determining stats for image map2048_MILCA_Coma_20deg_G.fits
+2021-05-24 02:20:22	INFO	imstat::ImageRegion::fromRecord	Selected bounding box : 
+2021-05-24 02:20:22	INFO	imstat::ImageRegion::fromRecord+	    [0, 0] to [699, 699]  (18.182533deg, 74.172170deg to 186.770267deg, 77.087182deg)
+2021-05-24 02:20:22	INFO	imstat::ImageStatsCalculator::_logStartup	Statistics calculated using Classic algorithm
+2021-05-24 02:20:22	INFO	imstat::ImageStatsCalculator::_logStartup	Regions --- 
+2021-05-24 02:20:22	INFO	imstat::ImageStatsCalculator::_logStartup	         -- bottom-left corner (pixel) [blc]:  [0, 0]
+2021-05-24 02:20:22	INFO	imstat::ImageStatsCalculator::_logStartup	         -- top-right corner (pixel) [trc]:    [699, 699]
+2021-05-24 02:20:22	INFO	imstat::ImageStatsCalculator::_logStartup	         -- bottom-left corner (world) [blcf]: 18.182533deg, 74.172170deg
+2021-05-24 02:20:22	INFO	imstat::ImageStatsCalculator::_logStartup	         -- top-right corner (world) [trcf]:   186.770267deg, 77.087182deg
+2021-05-24 02:20:23	SEVERE	imstat::image::statistics (file ../../tools/images/image_cmpt.cc, line 5119)	Exception Reported: Unit::check Illegal unit string '"COMPTON-Y"."COMPTON-Y"'
+2021-05-24 02:20:23	SEVERE	imstat::::	*** Error ***Unit::check Illegal unit string '"COMPTON-Y"."COMPTON-Y"'
+2021-05-24 02:20:23	INFO		
+2021-05-24 02:20:23	SEVERE	imstat::::	An error occurred running task imstat.
